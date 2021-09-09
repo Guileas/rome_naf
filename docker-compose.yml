@@ -8,7 +8,6 @@ services:
     container_name: ${PROJECT_NAME}
     hostname: rustup.${PROJECT_NAME}.local
     domainname: ${PROJECT_NAME}.local
-    user: "${UID}:${GID}"
     tty: true
     volumes:
       - ${FOLDER_PATH}:/rust
@@ -18,6 +17,35 @@ services:
       devEnvLocal:
         aliases:
           - rust.devEnv.local
+
+    #Mariadb Service
+  mariadb:
+    image: mariadb:10.4
+    container_name: ${PROJECT_NAME}_mariadb
+    dns_search: devEnv.local
+    hostname: mariadb.devEnv.local
+    domainname: devEnv.local
+    restart: on-failure:2
+    # Check if Db is switch on
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-upublic", "-ppublic"]
+      interval: 120s
+      timeout: 1s
+      retries: 3
+    networks:
+      devEnvLocal:
+        aliases:
+          - mariadb.devEnv.local
+          - mariadb104.devEnv.local
+    volumes:
+      - ${MYSQL_FOLDER_PATH}:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=rome_naf
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test
+    ports:
+      - "3306:3306"
 
 networks:
   devEnvLocal:
