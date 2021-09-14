@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use crate::db::schema::nafs;
 
-#[derive(Queryable, Identifiable)]
+#[derive(AsChangeset, Queryable, Identifiable)]
 #[primary_key(uuid)]
 #[column_name(uuid)]
 pub struct Naf {
@@ -22,4 +22,14 @@ pub struct NewNaf<'a> {
     pub code: &'a String,
     pub label: &'a String,
     pub description: Option<&'a String>
+}
+
+#[derive(Debug, Insertable, AsChangeset)]
+#[table_name = "nafs"]
+pub struct UpdateNaf{
+    pub uuid: Vec<u8>,
+    pub updated_at: Option<NaiveDateTime>,
+    pub code: String,
+    pub label: String,
+    pub description: Option<String>,
 }

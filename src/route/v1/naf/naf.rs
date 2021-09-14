@@ -13,6 +13,7 @@ use crate::responses::resources::NafResource::NafResource;
 use crate::models::naf::Naf;
 use crate::responses::resources::ServerError::ServerError;
 use crate::requests::NewNafRequest::NewNafRequest;
+use crate::models::naf::UpdateNaf;
 
 #[openapi(tag = "Naf")]
 #[get("/v1/naf")]
@@ -109,6 +110,34 @@ pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result
     }
 }
 
+#[openapi(tag = "Naf")]
+#[put("/v1/naf/<id>", format = "application/json", data = "<naf>")]
+pub fn update_naf_by_id(id: String, naf: Json<NewNafRequest>,  connection: Connection) -> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
+    let _id = Uuid::parse_str(&id).unwrap();
+
+    let _description= match naf.description{
+        None => None,
+        Some(ref x) => Some(String::from(x)),
+    };
+
+    let _naf = UpdateNaf {
+        uuid: _id.as_bytes().to_vec(),
+        updated_at: Some(chrono::Local::now().naive_utc()),
+        code: naf.code.to_string(),
+        label: naf.label.to_string(),
+        description: _description,
+    };
+
+    match diesel::update(nafs::table
+        .find(&_id.as_bytes().to_vec()))
+        .set(_naf)
+        .execute(&*connection) {
+            Ok(_) => Ok(Accepted::<Json<SuccessRessource>>(Some(Json(
+                SuccessRessource { success: true },
+            )))),
+            Err(_) => Err(ServerError("Unable to update the naf".to_string())),
+        }
+}
 
 
 #[openapi(tag = "Naf")]
