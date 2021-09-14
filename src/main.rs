@@ -35,6 +35,7 @@ pub fn build_rocket() -> Rocket<Build> {
             route::v1::naf::naf::insert_naf,
             route::v1::naf::naf::get_all_naf,
             route::v1::naf::naf::get_naf_by_id,
+            route::v1::naf::naf::delete_naf_by_id,
         ],
     )
     .mount(

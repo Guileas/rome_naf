@@ -7,14 +7,14 @@ use diesel::dsl::insert_into;
 use diesel::{self, prelude::*};
 use uuid::Uuid;
 use crate::models::naf::NewNaf;
-use crate::requests::new_naf::NewNafRequest;
+
 use crate::responses::resources::SuccessRessource::SuccessRessource;
-use crate::responses::resources::ServerError::ServerError;
 use crate::responses::resources::NafResource::NafResource;
 use crate::models::naf::Naf;
+use crate::responses::resources::ServerError::ServerError;
+use crate::requests::NewNafRequest::NewNafRequest;
 
-
-#[openapi]
+#[openapi(tag = "Naf")]
 #[get("/v1/naf")]
 pub fn get_all_naf(connection: Connection) -> Json<Vec<NafResource>> {
 
@@ -47,7 +47,7 @@ pub fn get_all_naf(connection: Connection) -> Json<Vec<NafResource>> {
     Json(_nafs)
 }
 
-#[openapi]
+#[openapi(tag = "Naf")]
 #[get("/v1/naf/<id>")]
 pub fn get_naf_by_id(connection: Connection, id: String) -> Json<Vec<NafResource>> {
 
@@ -107,4 +107,23 @@ pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result
         )))),
         Err(_) => Err(ServerError("Unable to create the naf".to_string())),
     }
+}
+
+
+
+#[openapi(tag = "Naf")]
+#[delete("/v1/naf/<id>")]
+pub fn delete_naf_by_id(_conn: Connection, id: String) -> Json<SuccessRessource> {
+    let _id = Uuid::parse_str(&id).unwrap();
+
+    diesel::delete(
+            nafs::table.filter(
+                nafs::uuid.eq(&_id.as_bytes().to_vec())
+            )
+        )
+        //.find(&_id.as_bytes().to_vec()))
+        .execute(&*_conn)
+        .expect("Error deleting naf");
+
+    Json(SuccessRessource{ success: true })
 }
