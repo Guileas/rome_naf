@@ -1,4 +1,13 @@
 table! {
+    keywords (uuid) {
+        uuid -> Binary,
+        created_at -> Timestamp,
+        updated_at -> Nullable<Timestamp>,
+        label -> Varchar,
+    }
+}
+
+table! {
     nafs (uuid) {
         uuid -> Binary,
         created_at -> Timestamp,
@@ -10,5 +19,6 @@ table! {
 }
 
 allow_tables_to_appear_in_same_query!(
+    keywords,
     nafs,
 );

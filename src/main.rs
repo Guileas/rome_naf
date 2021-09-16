@@ -37,6 +37,12 @@ pub fn build_rocket() -> Rocket<Build> {
             route::v1::naf::naf::get_naf_by_id,
             route::v1::naf::naf::update_naf_by_id,
             route::v1::naf::naf::delete_naf_by_id,
+            //Keywords
+            route::v1::keyword::keyword::insert_keyword,
+            route::v1::keyword::keyword::get_all_keyword,
+            route::v1::keyword::keyword::get_keyword_by_id,
+            route::v1::keyword::keyword::update_keyword_by_id,
+            route::v1::keyword::keyword::delete_keyword_by_id,
         ],
     )
     .mount(
