@@ -16,7 +16,8 @@ Cargo.lock
 
 /target
 
-
+/servers/mariadb-server/*
+!/servers/mariadb-server/.gitkeep
 # Added by cargo
 #
 # already existing elements were commented out
