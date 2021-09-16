@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate rocket;
 #[macro_use]
+extern crate diesel;
+extern crate dotenv;
+#[macro_use]
 extern crate rocket_okapi;
 
 #[cfg(test)] mod tests;
@@ -29,6 +32,11 @@ pub fn build_rocket() -> Rocket<Build> {
         "/",
         routes_with_openapi![
             index,
+            route::v1::naf::naf::insert_naf,
+            route::v1::naf::naf::get_all_naf,
+            route::v1::naf::naf::get_naf_by_id,
+            route::v1::naf::naf::update_naf_by_id,
+            route::v1::naf::naf::delete_naf_by_id,
         ],
     )
     .mount(
