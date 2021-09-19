@@ -1,5 +1,10 @@
 use crate::db::connection::Connection;
-use crate::db::schema::romes;
+use crate::db::schema::{
+    romes,rome_nafs, nafs
+};
+use diesel::debug_query;
+use diesel::mysql::Mysql;
+use diesel::sql_query;
 use rocket::serde::json::Json;
 use rocket::response::status::Accepted;
 use diesel::dsl::insert_into;
@@ -10,10 +15,14 @@ use crate::responses::resources::ServerError::ServerError;
 use crate::responses::resources::SuccessRessource::SuccessRessource;
 use crate::models::rome::UpdateRome;
 use crate::models::rome::NewRome;
+use crate::models::rome_nafs::NewRomeNaf;
 use crate::requests::NewRomeRequest::NewRomeRequest;
+use crate::requests::NewRomeNafsRequest::NewRomeNafsRequest;
 use crate::models::rome::Rome;
 use crate::responses::resources::RomeResource::RomeResource;
-
+use crate::models::naf::Naf;
+use crate::responses::resources::NafResource::NafResource;
+use crate::models::rome_nafs::RomeNaf;
 
 #[openapi(tag = "Rome")]
 #[get("/v1/rome")]
@@ -81,6 +90,53 @@ pub fn get_rome_by_id(connection: Connection, id: String) -> Json<Vec<RomeResour
     Json(_romes)
 }
 
+#[openapi(tag = "Rome")]
+#[get("/v1/rome_nafs/<id>")]
+pub fn get_nafs_by_rome(connection: Connection, id: String) -> Json<Vec<NafResource>>{
+
+    let _id = Uuid::parse_str(&id).unwrap();
+    let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
+
+    let query = romes::table
+    .inner_join(rome_nafs::table.inner_join(nafs::table))
+    .filter(romes::uuid.eq(&_id.as_bytes().to_vec()))
+    .select(nafs::all_columns)
+    .load::<Naf>(&*connection);
+
+
+    println!("{:#?}", query);
+
+    let results = romes::table
+        .inner_join(rome_nafs::table.inner_join(nafs::table))
+        .filter(romes::uuid.eq(&_id.as_bytes().to_vec()))
+        .select(nafs::all_columns)
+        .load::<Naf>(&*connection)
+        .expect("Could not load nafs");
+
+    let mut _nafs = Vec::new();
+
+    for naf in results {
+
+        let _uuid = match Uuid::from_slice(naf.uuid.as_slice()) {
+            Ok(_uuid) => _uuid,
+            Err(_err) => default_uuid,
+        };
+
+        let _description = match naf.description{
+            None => "",
+            Some(ref x) => x,
+        };
+
+        _nafs.push(NafResource{
+            uuid: _uuid.to_string(),
+            code: naf.code.to_string(),
+            label: naf.label.to_string(),
+            description: Some(_description.to_string()),
+        })
+    }
+
+    Json(_nafs)
+}
 
 #[openapi(tag = "Rome")]
 #[post("/v1/rome", format = "application/json", data = "<request>")]
@@ -106,6 +162,31 @@ pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Resu
             SuccessRessource { success: true },
         )))),
         Err(_) => Err(ServerError("Unable to create the rome".to_string())),
+    }
+}
+
+#[openapi(tag = "Rome")]
+#[post("/v1/rome_nafs", format = "application/json", data = "<request>")]
+pub fn link_rome_to_nafs(connection: Connection, request: Json<NewRomeNafsRequest>) -> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
+
+    let new_uuid = Uuid::new_v4();
+
+    let naf_uuid = Uuid::parse_str(&request.nafId).unwrap();
+    let rome_uuid = Uuid::parse_str(&request.romeId).unwrap();
+
+    let new_rome_nafs = NewRomeNaf {
+        uuid: &new_uuid.as_bytes().to_vec(),
+        created_at: &chrono::Local::now().naive_utc(),
+        updated_at: None,
+        rome_uuid: &rome_uuid.as_bytes().to_vec(),
+        naf_uuid: &naf_uuid.as_bytes().to_vec(),
+    };
+
+    match diesel::insert_into(rome_nafs::table).values(&new_rome_nafs).execute(&*connection) {
+        Ok(_) => Ok(Accepted::<Json<SuccessRessource>>(Some(Json(
+            SuccessRessource { success: true },
+        )))),
+        Err(_) => Err(ServerError("Unable to create the rome_nafs element".to_string())),
     }
 }
 

@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use crate::db::schema::nafs;
 
-#[derive(AsChangeset, Queryable, Identifiable)]
+#[derive(Debug,AsChangeset, Queryable, Identifiable)]
 #[primary_key(uuid)]
 #[column_name(uuid)]
 pub struct Naf {

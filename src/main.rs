@@ -49,6 +49,8 @@ pub fn build_rocket() -> Rocket<Build> {
             route::v1::rome::rome::get_rome_by_id,
             route::v1::rome::rome::update_rome_by_id,
             route::v1::rome::rome::delete_rome_by_id,
+            route::v1::rome::rome::link_rome_to_nafs,
+            route::v1::rome::rome::get_nafs_by_rome,
         ],
     )
     .mount(
