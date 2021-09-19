@@ -1,10 +1,10 @@
 use chrono::NaiveDateTime;
-use crate::db::schema::nafs;
+use crate::db::schema::romes;
 
-#[derive(Debug,AsChangeset, Queryable, Identifiable)]
+#[derive(AsChangeset, Queryable, Identifiable)]
 #[primary_key(uuid)]
 #[column_name(uuid)]
-pub struct Naf {
+pub struct Rome {
     pub uuid: Vec<u8>,
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>,
@@ -14,8 +14,8 @@ pub struct Naf {
 }
 
 #[derive(Insertable)]
-#[table_name = "nafs"]
-pub struct NewNaf<'a> {
+#[table_name = "romes"]
+pub struct NewRome<'a> {
     pub uuid: &'a Vec<u8>,
     pub created_at: &'a NaiveDateTime,
     pub updated_at: Option<&'a NaiveDateTime>,
@@ -25,8 +25,8 @@ pub struct NewNaf<'a> {
 }
 
 #[derive(Debug, Insertable, AsChangeset)]
-#[table_name = "nafs"]
-pub struct UpdateNaf{
+#[table_name = "romes"]
+pub struct UpdateRome{
     pub uuid: Vec<u8>,
     pub updated_at: Option<NaiveDateTime>,
     pub code: String,
