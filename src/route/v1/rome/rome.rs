@@ -103,9 +103,6 @@ pub fn get_nafs_by_rome(connection: Connection, id: String) -> Json<Vec<NafResou
     .select(nafs::all_columns)
     .load::<Naf>(&*connection);
 
-
-    println!("{:#?}", query);
-
     let results = romes::table
         .inner_join(rome_nafs::table.inner_join(nafs::table))
         .filter(romes::uuid.eq(&_id.as_bytes().to_vec()))
