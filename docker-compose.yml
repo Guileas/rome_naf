@@ -12,11 +12,13 @@ services:
     volumes:
       - ${FOLDER_PATH}:/rust
     ports:
-      - ${PORT:-8000}:8000
+      - ${API_HTTP_PORT:-8000}:8000
     networks:
       devEnvLocal:
         aliases:
           - rust.devEnv.local
+    env:
+        DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mariadb/${MYSQL_DATABASE}
 
     #Mariadb Service
   mariadb:
@@ -40,10 +42,10 @@ services:
     volumes:
       - ${MYSQL_FOLDER_PATH}:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=rome_naf
-      - MYSQL_USER=test
-      - MYSQL_PASSWORD=test
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
 
