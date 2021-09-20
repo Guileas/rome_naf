@@ -1,1 +1,1 @@
-DROP TABLE rome_nafs_table;
+DROP TABLE rome_nafs;
