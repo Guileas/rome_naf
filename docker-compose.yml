@@ -17,7 +17,7 @@ services:
       devEnvLocal:
         aliases:
           - rust.devEnv.local
-    env:
+    environment:
         DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mariadb/${MYSQL_DATABASE}
 
     #Mariadb Service
