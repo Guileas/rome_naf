@@ -4,4 +4,5 @@ pub mod resources {
     pub mod ServerError;
     pub mod NafResource;
     pub mod RomeResource;
+    pub mod CreationSuccessRessource;
 }

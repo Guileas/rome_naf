@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 use crate::responses::resources::ServerError::ServerError;
 use crate::responses::resources::SuccessRessource::SuccessRessource;
+use crate::responses::resources::CreationSuccessRessource::CreationSuccessRessource;
 use crate::models::keyword::UpdateKeyword;
 use crate::models::keyword::NewKeyword;
 use crate::requests::NewKeywordRequest::NewKeywordRequest;
@@ -114,7 +115,7 @@ pub fn get_nafs_by_keyword(connection: Connection, id: String) -> Json<Vec<NafRe
 
 #[openapi(tag = "Keyword")]
 #[post("/v1/keyword", format = "application/json", data = "<request>")]
-pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
+pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
 
     let new_uuid = Uuid::new_v4();
     let new_keyword = NewKeyword {
@@ -125,8 +126,8 @@ pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-
     };
 
     match diesel::insert_into(keywords::table).values(&new_keyword).execute(&*connection) {
-        Ok(_) => Ok(Accepted::<Json<SuccessRessource>>(Some(Json(
-            SuccessRessource { success: true },
+        Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
+            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the keyword".to_string())),
     }
@@ -134,7 +135,7 @@ pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-
 
 #[openapi(tag = "Keyword")]
 #[post("/v1/keyword_nafs", format = "application/json", data = "<request>")]
-pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafsRequest>) -> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
+pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafsRequest>) -> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
 
     let new_uuid = Uuid::new_v4();
 
@@ -150,8 +151,8 @@ pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafs
     };
 
     match diesel::insert_into(keyword_nafs::table).values(&new_keyword_nafs).execute(&*connection) {
-        Ok(_) => Ok(Accepted::<Json<SuccessRessource>>(Some(Json(
-            SuccessRessource { success: true },
+        Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
+            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the rome_nafs element".to_string())),
     }

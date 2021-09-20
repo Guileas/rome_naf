@@ -4,6 +4,7 @@ use serde::Serialize;
 
 #[derive(Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
-pub struct SuccessRessource {
-    pub success: bool
+pub struct CreationSuccessRessource {
+    pub success: bool,
+    pub uuid: String
 }

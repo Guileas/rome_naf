@@ -9,6 +9,7 @@ use uuid::Uuid;
 use crate::models::naf::NewNaf;
 
 use crate::responses::resources::SuccessRessource::SuccessRessource;
+use crate::responses::resources::CreationSuccessRessource::CreationSuccessRessource;
 use crate::responses::resources::NafResource::NafResource;
 use crate::models::naf::Naf;
 use crate::responses::resources::ServerError::ServerError;
@@ -85,7 +86,7 @@ pub fn get_naf_by_id(connection: Connection, id: String) -> Json<Vec<NafResource
 
 #[openapi(tag = "Naf")]
 #[post("/v1/naf", format = "application/json", data = "<request>")]
-pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
+pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
 
     let _description= match request.description{
         None => None,
@@ -103,8 +104,8 @@ pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result
     };
 
     match diesel::insert_into(nafs::table).values(&new_naf).execute(&*connection) {
-        Ok(_) => Ok(Accepted::<Json<SuccessRessource>>(Some(Json(
-            SuccessRessource { success: true },
+        Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
+            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the naf".to_string())),
     }
@@ -112,7 +113,7 @@ pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result
 
 #[openapi(tag = "Naf")]
 #[put("/v1/naf/<id>", format = "application/json", data = "<naf>")]
-pub fn update_naf_by_id(id: String, naf: Json<NewNafRequest>,  connection: Connection) -> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
+pub fn update_naf_by_id(id: String, naf: Json<NewNafRequest>,  connection: Connection) -> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
     let _id = Uuid::parse_str(&id).unwrap();
 
     let _description= match naf.description{
@@ -132,8 +133,8 @@ pub fn update_naf_by_id(id: String, naf: Json<NewNafRequest>,  connection: Conne
         .find(&_id.as_bytes().to_vec()))
         .set(_naf)
         .execute(&*connection) {
-            Ok(_) => Ok(Accepted::<Json<SuccessRessource>>(Some(Json(
-                SuccessRessource { success: true },
+            Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
+                CreationSuccessRessource { success: true, uuid: _id.to_string() },
             )))),
             Err(_) => Err(ServerError("Unable to update the naf".to_string())),
         }
