@@ -13,11 +13,13 @@ mod models;
 mod requests;
 mod responses;
 mod route;
+mod fairing;
 
 use rocket::*;
 use rocket_okapi::swagger_ui::SwaggerUIConfig;
 use rocket_okapi::swagger_ui::make_swagger_ui;
 use db::connection::connect;
+use fairing::cors::CORS;
 
 #[openapi]
 #[get("/")]
@@ -61,7 +63,7 @@ pub fn build_rocket() -> Rocket<Build> {
             url: "../openapi.json".to_owned(),
             ..Default::default()
         }),
-    )
+    ).attach(CORS)
 }
 
 #[launch]
