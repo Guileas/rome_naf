@@ -117,12 +117,31 @@ pub fn get_nafs_by_keyword(connection: Connection, id: String) -> Json<Vec<NafRe
 #[post("/v1/keyword", format = "application/json", data = "<request>")]
 pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
 
+    let keyword = keywords::table
+        .filter(keywords::label.eq(&request.label.to_uppercase().to_string()))
+        .limit(1)
+        .load::<Keyword>(&*connection)
+        .expect("Error loading keyword");
+
+
+    if(keyword.get(0).is_some()){
+        let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
+        let _uuid = match Uuid::from_slice(keyword[0].uuid.as_slice()) {
+            Ok(_uuid) => _uuid,
+            Err(_err) => default_uuid,
+        };
+
+        return Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
+            CreationSuccessRessource { success: true, message: "Keyword exists".to_string(), uuid: _uuid.to_string() },
+        ))))
+    }
+
     let new_uuid = Uuid::new_v4();
     let new_keyword = NewKeyword {
         uuid: &new_uuid.as_bytes().to_vec(),
         created_at: &chrono::Local::now().naive_utc(),
         updated_at: None,
-        label: &request.label
+        label: &request.label.to_uppercase()
     };
 
     match diesel::insert_into(keywords::table).values(&new_keyword).execute(&*connection) {
