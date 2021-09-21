@@ -140,6 +140,24 @@ pub fn get_nafs_by_rome(connection: Connection, id: String) -> Json<Vec<NafResou
 #[post("/v1/rome", format = "application/json", data = "<request>")]
 pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
 
+    let rome = romes::table
+        .filter(romes::code.eq(&request.code.to_uppercase()))
+        .limit(1)
+        .load::<Rome>(&*connection)
+        .expect("Error loading rome");
+
+    if(rome.get(0).is_some()){
+        let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
+        let _uuid = match Uuid::from_slice(rome[0].uuid.as_slice()) {
+            Ok(_uuid) => _uuid,
+            Err(_err) => default_uuid,
+        };
+
+        return Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
+            CreationSuccessRessource { success: true, message: "Rome exists".to_string(), uuid: _uuid.to_string() },
+        ))))
+    }
+
     let _description= match request.description{
         None => None,
         Some(ref x) => Some(x),
