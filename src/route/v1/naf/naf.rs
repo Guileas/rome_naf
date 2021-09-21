@@ -105,7 +105,7 @@ pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result
 
     match diesel::insert_into(nafs::table).values(&new_naf).execute(&*connection) {
         Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
+            CreationSuccessRessource { success: true,message: "Naf".to_string(), uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the naf".to_string())),
     }
@@ -134,7 +134,7 @@ pub fn update_naf_by_id(id: String, naf: Json<NewNafRequest>,  connection: Conne
         .set(_naf)
         .execute(&*connection) {
             Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-                CreationSuccessRessource { success: true, uuid: _id.to_string() },
+                CreationSuccessRessource { success: true, message: "Update Naf".to_string(), uuid: _id.to_string() },
             )))),
             Err(_) => Err(ServerError("Unable to update the naf".to_string())),
         }

@@ -6,5 +6,6 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct CreationSuccessRessource {
     pub success: bool,
+    pub message: String,
     pub uuid: String
 }

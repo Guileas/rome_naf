@@ -157,7 +157,7 @@ pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Resu
 
     match diesel::insert_into(romes::table).values(&new_rome).execute(&*connection) {
         Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
+            CreationSuccessRessource { success: true, message: "Rome".to_string(), uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the rome".to_string())),
     }
@@ -182,7 +182,7 @@ pub fn link_rome_to_nafs(connection: Connection, request: Json<NewRomeNafsReques
 
     match diesel::insert_into(rome_nafs::table).values(&new_rome_nafs).execute(&*connection) {
         Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
+            CreationSuccessRessource { success: true, message: "Rome_naf".to_string(), uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the rome_nafs element".to_string())),
     }

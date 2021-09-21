@@ -127,7 +127,7 @@ pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-
 
     match diesel::insert_into(keywords::table).values(&new_keyword).execute(&*connection) {
         Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
+            CreationSuccessRessource { success: true, message: "Keyword".to_string(), uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the keyword".to_string())),
     }
@@ -152,7 +152,7 @@ pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafs
 
     match diesel::insert_into(keyword_nafs::table).values(&new_keyword_nafs).execute(&*connection) {
         Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, uuid: new_uuid.to_string() },
+            CreationSuccessRessource { success: true, message: "Keyword_Naf".to_string(), uuid: new_uuid.to_string() },
         )))),
         Err(_) => Err(ServerError("Unable to create the rome_nafs element".to_string())),
     }
