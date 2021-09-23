@@ -138,7 +138,7 @@ pub fn get_nafs_by_rome(connection: Connection, id: String) -> Json<Vec<NafResou
 
 #[openapi(tag = "Rome")]
 #[post("/v1/rome", format = "application/json", data = "<request>")]
-pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
+pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Result<CreationSuccessRessource, ServerError<String>> {
 
     let rome = romes::table
         .filter(romes::code.eq(&request.code.to_uppercase()))
@@ -153,9 +153,7 @@ pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Resu
             Err(_err) => default_uuid,
         };
 
-        return Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, message: "Rome exists".to_string(), uuid: _uuid.to_string() },
-        ))))
+        return Ok(CreationSuccessRessource { existed: true, message: "Rome exists".to_string(), uuid: _uuid.to_string() })
     }
 
     let _description= match request.description{
@@ -174,16 +172,14 @@ pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Resu
     };
 
     match diesel::insert_into(romes::table).values(&new_rome).execute(&*connection) {
-        Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, message: "Rome".to_string(), uuid: new_uuid.to_string() },
-        )))),
+        Ok(_) => Ok(CreationSuccessRessource { existed: false, message: "Rome".to_string(), uuid: new_uuid.to_string() }),
         Err(_) => Err(ServerError("Unable to create the rome".to_string())),
     }
 }
 
 #[openapi(tag = "Rome")]
 #[post("/v1/rome_nafs", format = "application/json", data = "<request>")]
-pub fn link_rome_to_nafs(connection: Connection, request: Json<NewRomeNafsRequest>) -> Result<Accepted<Json<CreationSuccessRessource>>, ServerError<String>> {
+pub fn link_rome_to_nafs(connection: Connection, request: Json<NewRomeNafsRequest>) -> Result<CreationSuccessRessource, ServerError<String>> {
 
     let new_uuid = Uuid::new_v4();
 
@@ -199,9 +195,7 @@ pub fn link_rome_to_nafs(connection: Connection, request: Json<NewRomeNafsReques
     };
 
     match diesel::insert_into(rome_nafs::table).values(&new_rome_nafs).execute(&*connection) {
-        Ok(_) => Ok(Accepted::<Json<CreationSuccessRessource>>(Some(Json(
-            CreationSuccessRessource { success: true, message: "Rome_naf".to_string(), uuid: new_uuid.to_string() },
-        )))),
+        Ok(_) => Ok(CreationSuccessRessource { existed: false, message: "Rome_naf".to_string(), uuid: new_uuid.to_string() }),
         Err(_) => Err(ServerError("Unable to create the rome_nafs element".to_string())),
     }
 }
