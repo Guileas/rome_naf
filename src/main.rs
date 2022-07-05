@@ -16,8 +16,7 @@ mod route;
 mod fairing;
 
 use rocket::*;
-use rocket_okapi::swagger_ui::SwaggerUIConfig;
-use rocket_okapi::swagger_ui::make_swagger_ui;
+use rocket_okapi::{ openapi, openapi_get_routes, swagger_ui::{make_swagger_ui, SwaggerUIConfig}};
 use db::connection::connect;
 use fairing::cors::CORS;
 
@@ -32,7 +31,7 @@ pub fn build_rocket() -> Rocket<Build> {
     .manage(connect())
     .mount(
         "/",
-        routes_with_openapi![
+        openapi_get_routes![
             index,
             route::v1::naf::naf::insert_naf,
             route::v1::naf::naf::get_all_naf,

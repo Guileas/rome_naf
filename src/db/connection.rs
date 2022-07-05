@@ -7,6 +7,8 @@ use diesel::r2d2::{ Pool, PooledConnection, ConnectionManager };
 use std::ops::Deref;
 use dotenv::dotenv;
 use std::env;
+use rocket_okapi::request::{OpenApiFromRequest, RequestHeaderInput};
+use rocket_okapi::gen::OpenApiGenerator;
 
 pub type MysqlPool = Pool<ConnectionManager<MysqlConnection>>;
 //static DATABASE_URL: &'static str = env!("DATABASE_URL");
@@ -35,6 +37,19 @@ impl<'r> FromRequest<'r> for Connection {
             Ok(conn) => Outcome::Success(Connection(conn)),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
+    }
+}
+
+
+/// !INFO: https://github.com/GREsau/okapi#faq
+/// use the fix error : "the trait bound `db::connection::Connection: OpenApiFromRequest<'_>` is not satisfied"
+impl<'r> OpenApiFromRequest<'r> for Connection {
+    fn from_request_input(
+        _gen: &mut OpenApiGenerator,
+        _name: String,
+        _required: bool,
+    ) -> rocket_okapi::Result<RequestHeaderInput> {
+        Ok(RequestHeaderInput::None)
     }
 }
 
