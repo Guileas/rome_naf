@@ -1,4 +1,4 @@
-FROM rust:1.54
+FROM rust:1.58
 
 # RUN apk add dpkg debconf
 
