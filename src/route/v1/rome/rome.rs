@@ -24,8 +24,9 @@ use crate::responses::resources::RomeResource::RomeResource;
 use crate::models::naf::Naf;
 use crate::responses::resources::NafResource::NafResource;
 use crate::models::rome_nafs::RomeNaf;
+use rocket_okapi::{openapi, openapi_get_routes, swagger_ui::*};
 
-#[openapi(tag = "Rome")]
+#[openapi(tag = "Rome", ignore = "connection")]
 #[get("/v1/rome")]
 pub fn get_all_rome(connection: Connection) -> Json<Vec<RomeResource>> {
 
@@ -57,7 +58,7 @@ pub fn get_all_rome(connection: Connection) -> Json<Vec<RomeResource>> {
     Json(_romes)
 }
 
-#[openapi(tag = "Rome")]
+#[openapi(tag = "Rome", ignore = "connection")]
 #[get("/v1/rome/<id>")]
 pub fn get_rome_by_id(connection: Connection, id: String) -> Json<Vec<RomeResource>> {
 
@@ -91,7 +92,7 @@ pub fn get_rome_by_id(connection: Connection, id: String) -> Json<Vec<RomeResour
     Json(_romes)
 }
 
-#[openapi(tag = "Rome")]
+#[openapi(tag = "Rome", ignore = "connection")]
 #[get("/v1/rome_nafs/<id>")]
 pub fn get_nafs_by_rome(connection: Connection, id: String) -> Json<Vec<NafResource>>{
 
@@ -136,7 +137,7 @@ pub fn get_nafs_by_rome(connection: Connection, id: String) -> Json<Vec<NafResou
     Json(_nafs)
 }
 
-#[openapi(tag = "Rome")]
+#[openapi(tag = "Rome", ignore = "connection")]
 #[post("/v1/rome", format = "application/json", data = "<request>")]
 pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Result<CreationSuccessRessource, ServerError<String>> {
 
@@ -146,7 +147,7 @@ pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Resu
         .load::<Rome>(&*connection)
         .expect("Error loading rome");
 
-    if(rome.get(0).is_some()){
+    if rome.get(0).is_some(){
         let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
         let _uuid = match Uuid::from_slice(rome[0].uuid.as_slice()) {
             Ok(_uuid) => _uuid,
@@ -177,7 +178,7 @@ pub fn insert_rome(connection: Connection, request: Json<NewRomeRequest>)-> Resu
     }
 }
 
-#[openapi(tag = "Rome")]
+#[openapi(tag = "Rome", ignore = "connection")]
 #[post("/v1/rome_nafs", format = "application/json", data = "<request>")]
 pub fn link_rome_to_nafs(connection: Connection, request: Json<NewRomeNafsRequest>) -> Result<CreationSuccessRessource, ServerError<String>> {
 
@@ -200,7 +201,7 @@ pub fn link_rome_to_nafs(connection: Connection, request: Json<NewRomeNafsReques
     }
 }
 
-#[openapi(tag = "Rome")]
+#[openapi(tag = "Rome", ignore = "connection")]
 #[put("/v1/rome/<id>", format = "application/json", data = "<rome>")]
 pub fn update_rome_by_id(id: String, rome: Json<NewRomeRequest>,  connection: Connection) -> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
     let _id = Uuid::parse_str(&id).unwrap();
@@ -230,7 +231,7 @@ pub fn update_rome_by_id(id: String, rome: Json<NewRomeRequest>,  connection: Co
 }
 
 
-#[openapi(tag = "Rome")]
+#[openapi(tag = "Rome", ignore = "_conn")]
 #[delete("/v1/rome/<id>")]
 pub fn delete_rome_by_id(_conn: Connection, id: String) -> Json<SuccessRessource> {
     let _id = Uuid::parse_str(&id).unwrap();

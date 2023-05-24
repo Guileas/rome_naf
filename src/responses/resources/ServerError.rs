@@ -6,7 +6,7 @@ use rocket::serde::json::Json;
 use schemars::JsonSchema;
 use serde::Serialize;
 
-use okapi::openapi3::Responses;
+use rocket_okapi::okapi::openapi3::Responses;
 use rocket_okapi::gen::OpenApiGenerator;
 use rocket_okapi::response::OpenApiResponderInner;
 use rocket_okapi::util::add_schema_response;

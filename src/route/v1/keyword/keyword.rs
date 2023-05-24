@@ -21,7 +21,7 @@ use crate::models::keyword_nafs::NewKeywordNaf;
 use crate::responses::resources::NafResource::NafResource;
 use crate::models::naf::Naf;
 
-#[openapi(tag = "Keyword")]
+#[openapi(tag = "Keyword", ignore = "connection")]
 #[get("/v1/keyword")]
 pub fn get_all_keyword(connection: Connection) -> Json<Vec<KeywordResource>> {
 
@@ -47,7 +47,7 @@ pub fn get_all_keyword(connection: Connection) -> Json<Vec<KeywordResource>> {
     Json(_keyword)
 }
 
-#[openapi(tag = "Keyword")]
+#[openapi(tag = "Keyword", ignore = "connection")]
 #[get("/v1/keyword/<id>")]
 pub fn get_keyword_by_id(connection: Connection, id: String) -> Json<Vec<KeywordResource>> {
 
@@ -74,7 +74,7 @@ pub fn get_keyword_by_id(connection: Connection, id: String) -> Json<Vec<Keyword
     Json(_keywords)
 }
 
-#[openapi(tag = "Keyword")]
+#[openapi(tag = "Keyword", ignore = "connection")]
 #[get("/v1/keyword_nafs/<id>")]
 pub fn get_nafs_by_keyword(connection: Connection, id: String) -> Json<Vec<NafResource>>{
 
@@ -113,7 +113,7 @@ pub fn get_nafs_by_keyword(connection: Connection, id: String) -> Json<Vec<NafRe
     Json(_nafs)
 }
 
-#[openapi(tag = "Keyword")]
+#[openapi(tag = "Keyword", ignore = "connection")]
 #[post("/v1/keyword", format = "application/json", data = "<request>")]
 pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-> Result<CreationSuccessRessource, ServerError<String>> {
 
@@ -124,7 +124,7 @@ pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-
         .expect("Error loading keyword");
 
 
-    if(keyword.get(0).is_some()){
+    if keyword.get(0).is_some(){
         let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
         let _uuid = match Uuid::from_slice(keyword[0].uuid.as_slice()) {
             Ok(_uuid) => _uuid,
@@ -152,7 +152,7 @@ pub fn insert_keyword(connection: Connection, request: Json<NewKeywordRequest>)-
     }
 }
 
-#[openapi(tag = "Keyword")]
+#[openapi(tag = "Keyword", ignore = "connection")]
 #[post("/v1/keyword_nafs", format = "application/json", data = "<request>")]
 pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafsRequest>) -> Result<CreationSuccessRessource, ServerError<String>> {
 
@@ -176,7 +176,7 @@ pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafs
     }
 }
 
-#[openapi(tag = "Keyword")]
+#[openapi(tag = "Keyword", ignore = "connection")]
 #[put("/v1/keyword/<id>", format = "application/json", data = "<keyword>")]
 pub fn update_keyword_by_id(id: String, keyword: Json<NewKeywordRequest>,  connection: Connection) -> Result<Accepted<Json<SuccessRessource>>, ServerError<String>> {
     let _id = Uuid::parse_str(&id).unwrap();
@@ -199,7 +199,7 @@ pub fn update_keyword_by_id(id: String, keyword: Json<NewKeywordRequest>,  conne
 }
 
 
-#[openapi(tag = "Keyword")]
+#[openapi(tag = "Keyword", ignore = "_conn")]
 #[delete("/v1/keyword/<id>")]
 pub fn delete_keyword_by_id(_conn: Connection, id: String) -> Json<SuccessRessource> {
     let _id = Uuid::parse_str(&id).unwrap();

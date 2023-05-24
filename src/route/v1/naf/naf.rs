@@ -16,7 +16,7 @@ use crate::responses::resources::ServerError::ServerError;
 use crate::requests::NewNafRequest::NewNafRequest;
 use crate::models::naf::UpdateNaf;
 
-#[openapi(tag = "Naf")]
+#[openapi(tag = "Naf", ignore = "connection")]
 #[get("/v1/naf")]
 pub fn get_all_naf(connection: Connection) -> Json<Vec<NafResource>> {
 
@@ -49,7 +49,7 @@ pub fn get_all_naf(connection: Connection) -> Json<Vec<NafResource>> {
     Json(_nafs)
 }
 
-#[openapi(tag = "Naf")]
+#[openapi(tag = "Naf", ignore = "connection")]
 #[get("/v1/naf/<id>")]
 pub fn get_naf_by_id(connection: Connection, id: String) -> Json<Vec<NafResource>> {
 
@@ -84,7 +84,7 @@ pub fn get_naf_by_id(connection: Connection, id: String) -> Json<Vec<NafResource
 }
 
 
-#[openapi(tag = "Naf")]
+#[openapi(tag = "Naf", ignore = "connection")]
 #[post("/v1/naf", format = "application/json", data = "<request>")]
 pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result<CreationSuccessRessource, ServerError<String>> {
 
@@ -95,7 +95,7 @@ pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result
         .expect("Error loading naf");
 
 
-    if(naf.get(0).is_some()){
+    if naf.get(0).is_some(){
         let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
         let _uuid = match Uuid::from_slice(naf[0].uuid.as_slice()) {
             Ok(_uuid) => _uuid,
@@ -128,7 +128,7 @@ pub fn insert_naf(connection: Connection, request: Json<NewNafRequest>)-> Result
     }
 }
 
-#[openapi(tag = "Naf")]
+#[openapi(tag = "Naf", ignore = "connection")]
 #[put("/v1/naf/<id>", format = "application/json", data = "<naf>")]
 pub fn update_naf_by_id(id: String, naf: Json<NewNafRequest>,  connection: Connection) -> Result<CreationSuccessRessource, ServerError<String>> {
     let _id = Uuid::parse_str(&id).unwrap();
@@ -156,7 +156,7 @@ pub fn update_naf_by_id(id: String, naf: Json<NewNafRequest>,  connection: Conne
 }
 
 
-#[openapi(tag = "Naf")]
+#[openapi(tag = "Naf", ignore = "_conn")]
 #[delete("/v1/naf/<id>")]
 pub fn delete_naf_by_id(_conn: Connection, id: String) -> Json<SuccessRessource> {
     let _id = Uuid::parse_str(&id).unwrap();
