@@ -14,9 +14,9 @@ services:
     ports:
       - ${API_HTTP_PORT:-8000}:80
     networks:
-      persimfans:
+      haproxy-external:
         aliases:
-            - rome_naf.${DOMAIN_NAME}
+            - rome_naf.local
       devEnvLocal:
         aliases:
           - rust.devEnv.local
