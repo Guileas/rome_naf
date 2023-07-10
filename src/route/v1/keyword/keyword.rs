@@ -20,6 +20,16 @@ use crate::requests::NewKeywordNafsRequest::NewKeywordNafsRequest;
 use crate::models::keyword_nafs::NewKeywordNaf;
 use crate::responses::resources::NafResource::NafResource;
 use crate::models::naf::Naf;
+use crate::route::v1::keyword::keyword::keywords::label;
+use std::collections::HashMap;
+use crate::serde::Serialize;
+use rocket_okapi::JsonSchema;
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct SearchResult {
+    label: String,
+    naf_codes: Vec<String>,
+}
 
 #[openapi(tag = "Keyword", ignore = "connection")]
 #[get("/v1/keyword")]
@@ -45,6 +55,32 @@ pub fn get_all_keyword(connection: Connection) -> Json<Vec<KeywordResource>> {
     }
 
     Json(_keyword)
+}
+
+#[openapi(tag = "Keyword", ignore = "connection")]
+#[get("/v1/autocomplete/<search_term>")]
+pub fn autocomplete_keyword_search(search_term: String, connection: Connection) -> Json<Vec<SearchResult>> {
+    use crate::models::keyword::Keyword;
+    use crate::models::naf::Naf;
+    use crate::models::keyword_nafs::KeywordNaf;
+
+    let matching_keywords: Vec<SearchResult> = keywords::table
+    .inner_join(keyword_nafs::table.inner_join(nafs::table))
+    .filter(keywords::label.like(format!("{}%", search_term)))
+    .select((keywords::label, nafs::code))
+    .load::<(String, String)>(&*connection)
+    .expect("Could not load nafs")
+    .into_iter()
+    .fold(HashMap::new(), |mut map, (lab, naf_code)| {
+        map.entry(lab).or_insert_with(Vec::new).push(naf_code);
+        map
+    })
+    .into_iter()
+    .take(10)
+    .map(|(keyword, nafs)| SearchResult { label: keyword, naf_codes: nafs })
+    .collect();
+
+    Json(matching_keywords)
 }
 
 #[openapi(tag = "Keyword", ignore = "connection")]
