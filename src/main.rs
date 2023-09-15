@@ -50,7 +50,6 @@ pub fn build_rocket() -> Rocket<Build> {
             route::v1::keyword::keyword::link_keyword_to_nafs,
             route::v1::keyword::keyword::get_nafs_by_keyword,
             route::v1::keyword::keyword::autocomplete_keyword_search,
-            route::v1::keyword::keyword::get_keyword_specialty,
             //Rome
             route::v1::rome::rome::insert_rome,
             route::v1::rome::rome::get_all_rome,
