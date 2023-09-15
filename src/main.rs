@@ -37,6 +37,8 @@ pub fn build_rocket() -> Rocket<Build> {
             route::v1::naf::naf::insert_naf,
             route::v1::naf::naf::get_all_naf,
             route::v1::naf::naf::get_naf_by_id,
+            route::v1::naf::naf::get_naf_specialty_list,
+            route::v1::naf::naf::get_nafs_specialtys,
             route::v1::naf::naf::update_naf_by_id,
             route::v1::naf::naf::delete_naf_by_id,
             //Keywords
@@ -48,6 +50,7 @@ pub fn build_rocket() -> Rocket<Build> {
             route::v1::keyword::keyword::link_keyword_to_nafs,
             route::v1::keyword::keyword::get_nafs_by_keyword,
             route::v1::keyword::keyword::autocomplete_keyword_search,
+            route::v1::keyword::keyword::get_keyword_specialty,
             //Rome
             route::v1::rome::rome::insert_rome,
             route::v1::rome::rome::get_all_rome,
@@ -56,6 +59,11 @@ pub fn build_rocket() -> Rocket<Build> {
             route::v1::rome::rome::delete_rome_by_id,
             route::v1::rome::rome::link_rome_to_nafs,
             route::v1::rome::rome::get_nafs_by_rome,
+            //Specialty
+            route::v1::specialty::specialty::get_specialities_by_naf,
+            route::v1::specialty::specialty::insert_specialty,
+            route::v1::specialty::specialty::update_specialty_by_id,
+            route::v1::specialty::specialty::delete_specialty_by_id
         ],
     )
     .mount(
