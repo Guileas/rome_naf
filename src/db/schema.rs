@@ -1,13 +1,6 @@
-table! {
-    keywords (uuid) {
-        uuid -> Binary,
-        created_at -> Timestamp,
-        updated_at -> Nullable<Timestamp>,
-        label -> Varchar,
-    }
-}
+// @generated automatically by Diesel CLI.
 
-table! {
+diesel::table! {
     keyword_nafs (uuid) {
         uuid -> Binary,
         created_at -> Timestamp,
@@ -17,7 +10,16 @@ table! {
     }
 }
 
-table! {
+diesel::table! {
+    keywords (uuid) {
+        uuid -> Binary,
+        created_at -> Timestamp,
+        updated_at -> Nullable<Timestamp>,
+        label -> Varchar,
+    }
+}
+
+diesel::table! {
     nafs (uuid) {
         uuid -> Binary,
         created_at -> Timestamp,
@@ -28,7 +30,17 @@ table! {
     }
 }
 
-table! {
+diesel::table! {
+    rome_nafs (uuid) {
+        uuid -> Binary,
+        created_at -> Timestamp,
+        updated_at -> Nullable<Timestamp>,
+        rome_uuid -> Binary,
+        naf_uuid -> Binary,
+    }
+}
+
+diesel::table! {
     romes (uuid) {
         uuid -> Binary,
         created_at -> Timestamp,
@@ -39,25 +51,28 @@ table! {
     }
 }
 
-table! {
-    rome_nafs (uuid) {
+diesel::table! {
+    specialtys (uuid) {
         uuid -> Binary,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,
-        rome_uuid -> Binary,
-        naf_uuid -> Binary,
+        label -> Varchar,
+        description -> Nullable<Varchar>,
+        naf_id -> Binary,
     }
 }
 
-joinable!(keyword_nafs -> keywords (keyword_uuid));
-joinable!(keyword_nafs -> nafs (naf_uuid));
-joinable!(rome_nafs -> nafs (naf_uuid));
-joinable!(rome_nafs -> romes (rome_uuid));
+diesel::joinable!(keyword_nafs -> keywords (keyword_uuid));
+diesel::joinable!(keyword_nafs -> nafs (naf_uuid));
+diesel::joinable!(rome_nafs -> nafs (naf_uuid));
+diesel::joinable!(rome_nafs -> romes (rome_uuid));
+diesel::joinable!(specialtys -> nafs (naf_id));
 
-allow_tables_to_appear_in_same_query!(
-    keywords,
+diesel::allow_tables_to_appear_in_same_query!(
     keyword_nafs,
+    keywords,
     nafs,
-    romes,
     rome_nafs,
+    romes,
+    specialtys,
 );
