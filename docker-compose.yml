@@ -14,9 +14,9 @@ services:
     ports:
       - ${API_HTTP_PORT:-8000}:80
     networks:
-      haproxy-external:
-        aliases:
-            - rome_naf.local
+    #   haproxy-external:
+    #     aliases:
+    #         - rome_naf.local
       devEnvLocal:
         aliases:
           - rust.devEnv.local
@@ -52,10 +52,27 @@ services:
     ports:
       - "3306:3306"
 
+  phpmyadmin:
+        image: phpmyadmin:latest
+        restart: always
+        links:
+        - mariadb
+        ports:
+        - 8096:80
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            PMA_HOST: mariadb
+            PMA_USER: ${MYSQL_USER}
+            PMA_PASSWORD: ${MYSQL_PASSWORD}
+        networks:
+            devEnvLocal:
+                aliases:
+                    - pma.devEnv.local
+
 networks:
     devEnvLocal:
         driver: bridge
         name: ${PROJECT_NAME}_devEnvLocal
-    haproxy-external:
-        external:
-            name: haproxy-network
+    # haproxy-external:
+    #     external:
+    #         name: haproxy-network
