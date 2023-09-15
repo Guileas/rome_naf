@@ -1,36 +1,36 @@
 use chrono::NaiveDateTime;
-use crate::db::schema::nafs;
-use super::specialty::Specialty;
+use crate::db::schema::specialtys;
 
-#[derive(Debug,AsChangeset, Queryable, Identifiable)]
+#[derive(AsChangeset, Queryable, Identifiable)]
 #[primary_key(uuid)]
 #[column_name(uuid)]
-pub struct Naf {
+pub struct Specialty {
     pub uuid: Vec<u8>,
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>,
-    pub code: String,
     pub label: String,
     pub description: Option<String>,
+    pub naf_id: Vec<u8>,
 }
 
-#[derive(Insertable)]
-#[table_name = "nafs"]
-pub struct NewNaf<'a> {
+#[derive(Insertable, Debug)]
+#[table_name = "specialtys"]
+pub struct NewSpecialty<'a> {
     pub uuid: &'a Vec<u8>,
     pub created_at: &'a NaiveDateTime,
     pub updated_at: Option<&'a NaiveDateTime>,
-    pub code: &'a String,
     pub label: &'a String,
-    pub description: Option<&'a String>
+    pub description: Option<&'a String>,
+    pub naf_id: &'a Vec<u8>,
 }
 
 #[derive(Debug, Insertable, AsChangeset)]
-#[table_name = "nafs"]
-pub struct UpdateNaf{
+#[table_name = "specialtys"]
+pub struct UpdateSpecialty{
     pub uuid: Vec<u8>,
     pub updated_at: Option<NaiveDateTime>,
-    pub code: String,
     pub label: String,
     pub description: Option<String>,
+    pub naf_id: Vec<u8>,
 }
+

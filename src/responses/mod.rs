@@ -5,4 +5,5 @@ pub mod resources {
     pub mod NafResource;
     pub mod RomeResource;
     pub mod CreationSuccessRessource;
+    pub mod SpecialtyResource;
 }
