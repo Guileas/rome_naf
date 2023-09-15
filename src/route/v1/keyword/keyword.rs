@@ -1,12 +1,16 @@
+use crate::db::schema::keyword_nafs::naf_uuid;
+use crate::requests::NewKeywordSpecialtysRequest::NewKeywordSpecialtysRequest;
 use crate::responses::resources::KeywordResource::KeywordResource;
 use crate::db::connection::Connection;
 use crate::db::schema::{
-    keywords,keyword_nafs, nafs
+    keywords,keyword_nafs, nafs, specialtys
 };
+use crate::models::specialty::{Specialty, NewSpecialty};
+use diesel::sql_types::{Binary, Text};
 use rocket::serde::json::Json;
 use rocket::response::status::Accepted;
 use diesel::dsl::insert_into;
-use diesel::{self, prelude::*};
+use diesel::{self, prelude::*, sql_query};
 use uuid::Uuid;
 
 use crate::responses::resources::ServerError::ServerError;
@@ -28,7 +32,53 @@ use rocket_okapi::JsonSchema;
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct SearchResult {
     label: String,
+    naf_codes: Vec<String>
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct SearchResultWithNafId {
+    label: String,
     naf_codes: Vec<String>,
+    naf_ids: Vec<String>
+}
+
+pub struct SearchNaf {
+    keyword_id: Vec<u8>,
+    label: String,
+    naf_ids: Vec<Vec<u8>>
+}
+
+#[derive(Debug, Serialize, JsonSchema, Queryable)]
+pub struct SearchResultWithSpecialties {
+    label: String,
+    naf_codes: Vec<String>,
+    specialties: Vec<MinimalSpecialty>
+}
+
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct MinimalNaf {
+    code: String,
+    id: Vec<u8>
+}
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct MinimalSpecialty {
+    id: String,
+    name: String
+}
+
+impl Queryable<(Binary, Text), diesel::mysql::Mysql> for MinimalSpecialty {
+    type Row = (Vec<u8>, String);
+
+    fn build(row: Self::Row) -> Self {
+        let (id, name) = row;
+        let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
+        let _uuid = match Uuid::from_slice(id.as_slice()) {
+            Ok(_uuid) => _uuid,
+            Err(_err) => default_uuid,
+        };
+        MinimalSpecialty { id: _uuid.to_string(), name }
+    }
 }
 
 #[openapi(tag = "Keyword", ignore = "connection")]
@@ -59,25 +109,40 @@ pub fn get_all_keyword(connection: Connection) -> Json<Vec<KeywordResource>> {
 
 #[openapi(tag = "Keyword", ignore = "connection")]
 #[get("/v1/autocomplete/<search_term>")]
-pub fn autocomplete_keyword_search(search_term: String, connection: Connection) -> Json<Vec<SearchResult>> {
+pub fn autocomplete_keyword_search(search_term: String, connection: Connection) -> Json<Vec<SearchResultWithNafId>> {
     use crate::models::keyword::Keyword;
     use crate::models::naf::Naf;
     use crate::models::keyword_nafs::KeywordNaf;
 
-    let matching_keywords: Vec<SearchResult> = keywords::table
+    let matching_keywords: Vec<SearchResultWithNafId> = keywords::table
     .inner_join(keyword_nafs::table.inner_join(nafs::table))
     .filter(keywords::label.like(format!("{}%", search_term)))
-    .select((keywords::label, nafs::code))
-    .load::<(String, String)>(&*connection)
+    .select((keywords::label, nafs::code, nafs::uuid))
+    .load::<(String, String, Vec<u8>)>(&*connection)
     .expect("Could not load nafs")
     .into_iter()
-    .fold(HashMap::new(), |mut map, (lab, naf_code)| {
-        map.entry(lab).or_insert_with(Vec::new).push(naf_code);
+    .fold(HashMap::new(), |mut map, (lab, naf_code, naf_id)| {
+        let lab_clone = lab.clone();
+        let default_uuid: Uuid = Uuid::parse_str("00000000000000000000000000000000").unwrap();
+        let _uuid = match Uuid::from_slice(naf_id.as_slice()) {
+            Ok(_uuid) => _uuid,
+            Err(_err) => default_uuid,
+        };
+
+        //map.entry(lab).or_insert_with(Vec::new).push(naf_code);
+        map.entry(lab.clone())
+            .or_insert_with(|| (Vec::new(), Vec::new())) // Tuple to store naf_codes and naf_uuids
+            .0
+            .push(naf_code);
+        map.entry(lab_clone)
+            .or_insert_with(|| (Vec::new(), Vec::new())) // Tuple to store naf_codes and naf_uuids
+            .1
+            .push(_uuid.to_string());
         map
     })
     .into_iter()
     .take(10)
-    .map(|(keyword, nafs)| SearchResult { label: keyword, naf_codes: nafs })
+    .map(|(keyword, (nafs, naf_id))| SearchResultWithNafId { label: keyword, naf_codes: nafs, naf_ids: naf_id })
     .collect();
 
     Json(matching_keywords)
@@ -194,7 +259,8 @@ pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafs
 
     let new_uuid = Uuid::new_v4();
 
-    let naf_uuid = Uuid::parse_str(&request.nafId).unwrap();
+    let naf_id = Uuid::parse_str(&request.nafId).unwrap();
+
     let keyword_uuid = Uuid::parse_str(&request.keywordId).unwrap();
 
     let new_keyword_nafs = NewKeywordNaf {
@@ -202,7 +268,7 @@ pub fn link_keyword_to_nafs(connection: Connection, request: Json<NewKeywordNafs
         created_at: &chrono::Local::now().naive_utc(),
         updated_at: None,
         keyword_uuid: &keyword_uuid.as_bytes().to_vec(),
-        naf_uuid: &naf_uuid.as_bytes().to_vec(),
+        naf_uuid: &naf_id.as_bytes().to_vec(),
     };
 
     match diesel::insert_into(keyword_nafs::table).values(&new_keyword_nafs).execute(&*connection) {
